@@ -1,0 +1,32 @@
+---
+- hosts: webservers
+  become: yes
+  tasks:
+  - name: Install apt
+    apt: name=aptitude state=latest update_cache=yes force_apt_get=yes
+​
+  - name : Install system package
+    apt: name={{ item }} state=latest update_cache=yes
+    loop: [ 'apt-transport-https', 'ca-certificates', 'curl', 'software-properties-common' ]
+​
+  - name: Add Docker GPG
+    apt_key:
+     url: https://download.docker.com/linux/ubuntu/gpg
+     state: present
+​
+  - name: Add Docker Repository
+    apt_repository:
+     repo: deb https://download.docker.com/linux/ubuntu bionic stable
+     state: present
+​
+  - name: Install docker-ce
+    apt: update_cache=yes name=docker-ce state=latest
+  
+  - name: Avoid socket issue
+    command: 'sudo chmod 666 /var/run/docker.sock'
+    
+  - name: Login to Docker Hub
+    command: 'docker login --username=nweydert --password=Nicolas1976!'
+    
+  - name: Run Docker Container
+    command: 'docker run -p 2021:8080 nweydert/squad9'
